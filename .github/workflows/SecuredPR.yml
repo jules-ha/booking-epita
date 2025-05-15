@@ -1,0 +1,61 @@
+name: Pull Requests
+
+on:
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  # to read code and write SARIF to the security tab
+  contents: read
+  security-events: write
+  actions: read
+
+jobs:
+  osv-scan-pr:
+    name: OSV-Scanner PR Diff
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout full history
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0       # needed to compare base vs. head
+
+      - name: Run OSV Scanner PR check
+        uses: google/osv-scanner-action/.github/workflows/osv-scanner-reusable-pr.yml@v2.0.2
+        # This reusable workflow:
+        #  • scans both the base & head of the PR
+        #  • reports only new vulnerabilities introduced by the PR
+        #  • annotates the "Files changed" tab and emits SARIF :contentReference[oaicite:0]{index=0}
+
+      - name: Upload OSV differential SARIF
+        uses: actions/upload-artifact@v3
+        with:
+          name: osv-pr-diff-report
+          path: codeql-sarif/osv-diff.sarif
+          # the reusable workflow writes its diff report here by default
+
+  semgrep-pr:
+    name: Semgrep PR Diff
+    runs-on: ubuntu-latest
+    container:
+      image: returntocorp/semgrep
+
+    steps:
+      - name: Checkout full history
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Run Semgrep differential analysis
+        run: |
+          semgrep \
+            --config p/java \
+            --baseline "${{ github.event.pull_request.base.sha }}" \
+            --sarif \
+            --output semgrep-diff-results.sarif
+
+      - name: Upload Semgrep differential SARIF
+        uses: actions/upload-artifact@v3
+        with:
+          name: semgrep-pr-diff-report
+          path: semgrep-diff-results.sarif

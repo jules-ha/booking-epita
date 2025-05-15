@@ -2,12 +2,12 @@ name: Daily OSV Scan
 
 on:
   schedule:
-    - cron: '0 0 * * *'  # Daily at midnight
+    - cron: '0 0 * * *'
   push:
     branches: [main]
 
 jobs:
-  DependenciesAnalysis:
+  VulnAnalysis:
     runs-on: ubuntu-latest
 
     steps:

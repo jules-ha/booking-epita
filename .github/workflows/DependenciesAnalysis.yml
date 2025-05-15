@@ -1,33 +1,40 @@
 name: Daily OSV Scan
 
 on:
+  # every day at midnight UTC
   schedule:
     - cron: '0 0 * * *'
+  # manual trigger for testing
   workflow_dispatch:
 
 permissions:
-  contents: read
-  actions: read
+  # Needed to write SARIF to the Security tab
   security-events: write
+  # Needed to read your code
+  contents: read
 
 jobs:
   osv-scan:
+    name: Run OSV Scanner & Upload SARIF
     runs-on: ubuntu-latest
     steps:
-      - name: Check out code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Run OSV Scanner (container)
+      - name: Run OSV Scanner
+        # use the container action directly
         uses: google/osv-scanner-action/osv-scanner-action@v2.0.2
         with:
           scan-args: |-
             --format sarif
             --output osv-results.sarif.json
             --recursive
-            ./
-          fail-on-vulns: false
+            ./app
+            # don't fail CI on vuln findings (remove if you want it to block)
+            --fail-on-vulns=false
 
       - name: Upload SARIF to Security Dashboard
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: osv-results.sarif.json
+

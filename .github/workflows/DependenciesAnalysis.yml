@@ -1,0 +1,29 @@
+name: Daily OSV Scan
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  osv-scan:
+    name: Run OSV Scanner & Upload SARIF
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.x
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Run OSV Scanner
+        uses: google/osv-scanner-action/osv-scanner-action@v1
+        with:
+          output_file: osv-results.sarif.json
+
+      - name: Upload OSV SARIF to Security Dashboard
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: osv-results.sarif.json

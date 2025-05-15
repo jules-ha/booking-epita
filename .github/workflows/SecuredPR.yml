@@ -12,8 +12,7 @@ permissions:
 
 jobs:
   vuln-analysis:
-    uses: 
-      jules-ha/booking-epita/edit/main/.github/workflows/SecuredPR.yml@main
+    uses: jules-ha/booking-epita/.github/workflows/DependenciesAnalysis.yml@main
     with:
       scan-dir: app/
     secrets: inherit

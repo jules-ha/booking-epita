@@ -25,6 +25,7 @@ jobs:
             --output osv-results.sarif.json
             --recursive
             ./
+          fail-on-vulns: false
 
       - name: Upload SARIF to Security Dashboard
         uses: github/codeql-action/upload-sarif@v3

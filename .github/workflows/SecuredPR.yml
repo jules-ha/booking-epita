@@ -11,12 +11,6 @@ permissions:
   actions: read
 
 jobs:
-  vuln-analysis:
-    uses: 
-      jules-ha/booking-epita/edit/main/.github/workflows/SecuredPR.yml@main
-    with:
-      scan-dir: app/
-    secrets: inherit
   osv-scan-pr:
     name: OSV-Scanner PR Diff
     runs-on: ubuntu-latest
